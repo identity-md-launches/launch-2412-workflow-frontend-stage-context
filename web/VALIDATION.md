@@ -1,80 +1,154 @@
-# Wallet and Mint validation
+# swornbyswarm redirect validation
 
-Worker checks on 2026-10-24 UTC, not independent certification. Scope: the ten requested changes to the existing Sworn site. Addresses, chain, ABIs, RPC pool, runtime integrity checks, routes, snapshot, contracts, build configuration and dependencies remain unchanged. Static source and the rebuilt repository-root `dist/` are the delivery; hosting follows network submission.
+Worker observations on 2026-10-25. These are local checks, not independent
+certification or a claim that the hosted name has already been updated.
 
-## Requirement coverage
+## Scope and decisions
 
-`tests/wallet-mint-browser.mjs` serves the production export under `/preview/` with fake EIP-1193, RPC and API replies. Its eleven scenario groups pass, with 54 geometry observations and no console/page/local-resource errors or signing calls. All ten items have explicit assertions.
+The active site is the move notice in `web/index.html`, exported to `dist/`.
+The new site destination is exactly `https://sworn.sites.imd.fun/`. All visible
+copy is the assigned copy, with one heading, one paragraph and one link. The
+original palette, monospace stack and favicon are retained. The old app modules
+remain source history and are not imported or shipped by this entry point.
 
-| Item | Passing case and evidence |
+The explicit restriction to `web/` and `dist/` takes precedence over the generic
+request to update repository-root `DESIGN.md`. The current design documentation
+is therefore `web/DESIGN.md`; the root document is unchanged. Package manifests,
+lockfile, Vite configuration, contracts and dependency sources are unchanged.
+No ignore-file change, new submodule, RPC read, signing, analytics or publication
+command was needed.
+
+## Requirement checks
+
+| Requirement | Result and evidence |
 | --- | --- |
-| 1 | `1 Wallet card…` checks exact title, claimant and minted status, below-intro ordering, left/right layout at 1280 and stacking at 390, authentic fixture image, no caption/status in the card aside, only the requested hint. Pointer, Space and Enter select/clear a family; catalog and community facts sharing its cell highlight together; empty cells have no control. `1,3 Wallet without…` checks no block without a card and no hint/controls on a minted empty card. |
-| 2 | `2 Wallet full-width groups…` measures full content width, two direct facts per row, one sworn fact per row and three aligned columns across both sworn groups. Exact type labels, Mint colors, green titles, short rules and phone stacking are asserted. |
-| 3 | `3 Mint with card…` asserts the exact single line, its Wallet link and navigation, and no card block. No-card controls/preview remain, with the exact capitalized fee sentence. Wallet's redundant Claimed facts line and empty-card hint are absent. |
-| 4 | `4,7 Mint 02 intro…` compares each category paragraph and the note's width to 01 and 03 at 1280px. |
-| 5 | `5 Community rows…` holds a spec read to check the single loading status immediately above the payment notice, releases it and checks the registered row, then tests empty and failed reads. Trailing Community facts heading/success/empty copy are absent. |
-| 6 | `6 Paid facts checked…` checks the historical nonce request at block 25,769,870 and nonce 5 hiding 1301 on load in a counted disclosure. Reveal/select/hide retains its row and exact note; the dialog repeats the note; deselecting hides it again. Held 1301 remains visible without a nonce check. `6 Failed or unanswered…` covers unavailable history and the deadline branch (20-second timer shortened to 200ms in that test only), with no inferred negative. |
-| 7 | `4,7…` measures equal top edges of all three Why columns at 1280px. |
-| 8 | `8 Pending seats…` uses an expanded 11-seat panel with true, false, failed and waiting seats. Its final row has no trailing rule, earlier rows retain their lines, and 01/02/03 each have one leading rule. Rendered borders are compared with intervening content across every canonical route, connected/disconnected, at 1280/390/320; no empty separator pair. |
-| 9 | `9,10 Exact BurnExecutor…` checks rendered Mint, Catalog, Wallet and About text for the removed version/dependency phrases and burned-fee claims, plus About's exact paragraph. `3…` checks the capitalized no-card fee sentence. |
-| 10 | `9,10…` asserts `Account nonce ≥ 20 at launch of WhitelistCurator` on Mint, Catalog and held Wallet. |
+| Exact title `swornbyswarm` | Met; source and exported HTML, static test and browser title check |
+| Immediate JavaScript redirect, own hash, no added history entry | Met; exact production script exercised for 12 hashes in the VM; Chromium followed 10 hash cases and Back returned directly to the previous page |
+| No-JavaScript redirect after one second, base destination | Met; head `noscript` refresh has exact `1;url=...` content; real JS-disabled navigation observed at 1,213ms from initial navigation start, including test/browser overhead |
+| Fixed canonical destination | Met; source/export assertions and browser DOM inspection |
+| Exact heading, paragraph and Open Sworn label/destination | Met; static and rendered assertions; VM verifies hash is appended to the link before replacement |
+| Minimal export | Met; only `index.html` (2,377 bytes) and unchanged `favicon.svg` (306 bytes); no directories, app assets, ABIs, data or deployment manifest |
+| First phone screen and responsiveness | Met in Chromium; heading, full paragraph and action visible at 390×844; action bottom 296.19px, hit target 44px high; also checked 320, 768 and 1440px |
+| Metadata and relative runtime assets | Met; title, description, favicon, og:title, og:image; favicon and OG image reuse `./favicon.svg` |
+| Rebuild instructions, design and review record | Met inside allowed `web/` paths; see README.md, DESIGN.md and this file |
+| Same hosted site name | Export remains at repository-root `dist/`; hosting the next version of the existing name occurs after submission |
 
-The last group also checks Explore and Connect on the first 390×844 screen, address validation/keyboard navigation, title/favicon/description/OG metadata and no signing. Screenshots of Wallet at 1280/390, Why columns, 02 intros, populated pending seats and focused phone Home were made and visually inspected.
+## Commands and actual results
 
-## Actual checks
+Commands below are from the repository root unless shown with `cd web`.
 
-Dependencies were installed from the unchanged lockfile in a temporary repository copy, with npm cache and dependencies outside the submission. The provided Playwright installation was used with its Chromium runtime. The original Git object store was read for the pinned ABI comparison; no repository metadata was edited. Commands are web-relative unless noted.
-
-- `npm ci --cache /tmp/sworn-npm-cache --no-audit --no-fund`: passed in the temporary build copy.
-- `npm run typecheck`: passed on final source.
-- `npm run build`: passed on final source; all three pinned ABI byte/canonical-Keccak checks passed. Inherited upstream client-directive, worker-module and bundler timing warnings remain.
-- `npm run verify:export`: passed, 65 manifest-listed assets and 1,524,359 listed bytes. With `imd-deployment.json`, the export has 66 files and 1,535,577 bytes.
-- A second production build was compared to delivered `dist/`: identical relative paths and SHA-256 values for all 66 files, including index, assets, `art/full-house.svg` and manifest. No obsolete hashed assets remain.
-- `npm test`: passed, 108 unit/export tests and 55 Chromium route/width combinations at 320, 390, 780, 1280 and 1440, plus legacy anchor checks. Optional live RPC/fork cases explicitly skipped.
-- `node tests/wallet-mint-browser.mjs`: 11 groups passed, 54 geometry observations, zero errors or signing calls.
-- `node tests/sworn-step-browser.mjs`: all 6 previous-step groups passed, including 34 separator observations and unchanged footer/Integrate/About behavior.
-- Additional fake-wallet regression suites passed: `acceptance.mjs` (12 groups), `actions.mjs` (11), `followup.mjs` (10), `swarm-browser.mjs` (10), `oracle-feed-browser.mjs` (10), `personal-facts-browser.mjs` (15), `eligibility-snapshot-browser.mjs` (6). Fake wallet prompts in those suites never sign or broadcast to a network.
-- Source/test formatting and `git diff --check`: passed for changed formatted files. The previous step's existing unformatted test file retains its formatting except the changed assertions.
-
-Some inherited test expectations predated the accepted starting tree. The interface-label snapshot was regenerated from that starting tree, not the new implementation: the only added control/link label is `Wallet page`, and none was removed. Browser expectations now reflect the requested card move/type/rule changes and the previous step's already-removed proof/footer controls. Disclosure helpers reveal once to avoid repeated clicks while on-load checks settle; bounded read tests account for both initial checks and selected-fact advice. Safety, consent, retry, receipt and integrity assertions remain exercised.
-
-## Better Interface review
-
-The pinned workflow, all six domain cores and documentation method were read and applied. Final tokens/components/responsive behavior are in root `DESIGN.md`; existing attribution remains in `web/LICENSES/Better-Interface.txt`.
-
-| Domain | Checked coverage and limits |
+| Command | Result |
 | --- | --- |
-| Accessibility | Native named links/buttons, cell pressed state, pointer/Space/Enter toggling, checkbox disclosure, keyboard form submission and existing wallet-dialog focus/return. Focus screenshot inspected. Screen readers, physical devices and native 200% zoom unperformed. |
-| Layout | Card/fact order, full widths, row/column alignment, equal info tops and separator/content geometry at desktop/phone widths. Existing route sweep adds 780/1440 coverage. Wallet and Home screenshots inspected. RTL/localization expansion unperformed. |
-| Writing | Exact requested rule/fee/minted-link copy, removed redundant lines and unchanged control/link labels. Loading, failure, empty and unknown states retain only supported claims. |
-| Typography | Reused existing tokens, full-width 02 prose, compact row types and wrapping; phone and desktop screenshots inspected. Existing monospace design and previous step's 19px Mint titles retained. Font fallback can vary by platform. |
-| Colors | Rendered Wallet text pairs measured against `rgb(10,10,10)`: muted 6.475:1, accent/Chain-proven 14.500:1, Panel-sworn 14.300:1, Shared 18.225:1. All exceed 4.5:1. Entry-page probe contrast passes. SVG pixels/overlays not comprehensively measured. |
-| UI | Reused flat surfaces and card/hive geometry, preserved empty/loading/error/pending/selected states, and centered Wallet art using Mint's existing caps. No new motion; reduced-motion probe passes. Native wallet handoff and passkeys unperformed. |
+| `cd web && npm ci --ignore-scripts --no-audit --no-fund` | Passed; 72 packages installed from the existing lockfile; cache kept outside the submission |
+| `cd web && npm run typecheck` | Passed, exit 0; existing TypeScript project, `tsc --noEmit` |
+| `npm run build --prefix web` | Passed, exit 0, including final rebuild; offline pinned-ABI preflight, Vite 8.3.5, redirect-only export verification |
+| `npm run verify:export --prefix web` | Passed, exit 0; two files, 2,683 bytes |
+| `node --test web/tests/redirect.test.mjs` | Passed; 3 tests, 0 failed; export/copy/metadata, plus direct execution of the exact shipped script across 12 hash cases |
+| `node --check web/scripts/manifest.mjs` and `node --check web/tests/redirect-browser.mjs` | Passed, exit 0 |
+| `node web/tests/redirect-browser.mjs --chromium-only` | Passed, exit 0; 10 scenario groups, including console and resource checks |
+| `git diff --check` | Passed, exit 0 |
 
-Findings corrected and rechecked:
+Playwright browser binaries were downloaded to temporary storage. During this
+run browser commands used `PLAYWRIGHT_BROWSERS_PATH` to select that temporary
+installation; no binaries, caches or runtime libraries are delivery assets.
 
-| Finding | Final source and fix | Recheck |
-| --- | --- | --- |
-| Card and facts competed for Wallet width | `src/wallet-facts.tsx:260`, `src/styles.css:980`: reuse Mint's card block, followed by full-width direct pairs and sworn columns. | Exact copy, layout rectangles, pointer/keyboard highlights and screenshots. |
-| Redundant captions/status and empty hint | `src/components.tsx:197`, `src/wallet-facts.tsx:286`: optional caption, Wallet hint only with selectable families, remove below-card status. | Empty/nonempty/no-card fixtures; previous suite. |
-| Known ineligible paid facts stayed visible on load | `src/claim.tsx:1118`: use Explorer's existing bounded hook and pass its result to disclosure; selected facts stay visible. | Nonce-5, held, failure/deadline and personal/snapshot regression cases. |
-| Narrow 02 copy, offset Why columns, redundant community text | `src/styles.css:829`, `:1795`, `src/claim.tsx:1582`: remove measure cap, reset item margin, keep one loading/error line above payment notice. | Width/top-edge metrics and held/released/failed community reads. |
-| Adjacent empty separator lines with populated pending panel | `src/styles.css:745`, `:806`: remove last seat's line and restore 01's leading rule. | Expanded populated panel plus all-route border/content matrix. |
-| Old Wallet style left art aligned to its column edge | `src/styles.css:1751`: center figure while retaining Mint's responsive caps. | Final 1280/390 screenshots and geometry suite. |
-| Outdated fee/rule wording | `src/components.tsx:156`, `src/pages.tsx`, `src/data.ts`: exact requested public copy. | Four rendered routes and pinned label test. |
+The browser test hosts the real exported bytes under `/preview/` inside a
+bounded foreground process. It fulfills destination navigation with an inert
+HTML response and rejects any other external request. It never contacts the
+new site's service or a chain/API. Chromium checked the empty hash, root,
+Explorer, Mint, Wallet, Catalog, How it works, Integrate, a query plus nested
+anchor and an encoded hash. It also checked the `/preview/index.html` entry.
+Back skipped the redirect on every route. Real JavaScript-disabled visits
+refreshed and activated the plain link. JavaScript navigation had no console
+errors or uncaught script errors.
 
-The pinned probe ran from the repository root against final `dist/`:
+For visual and keyboard inspection only, `/inspect/` serves identical export
+bytes with a response CSP `script-src 'none'`. This pauses the redirect while
+keeping `noscript` inert. That inspection response deliberately produces a CSP
+console message; it is not a production header. The ordinary behavior tests
+use `/preview/` without the policy. No missing/failed local resources or HTTP
+errors were observed. The local favicon was fetched successfully under the
+subpath. No RPC, wallet, analytics or API requests were made.
 
-```sh
-IMD_PLAYWRIGHT=/opt/imd-tools/playwright-mcp/node_modules/playwright/index.mjs PLAYWRIGHT_BROWSERS_PATH=/opt/imd-tools/ms-playwright node .imd/reads/skills/design-critic/scripts/taste.mjs --out test/scratch/taste --offline
-```
+Screenshots produced and actually inspected:
+`test/scratch/redirect/chromium-320.png`, `chromium-390.png`,
+`chromium-1440.png`, `chromium-focus.png` and `chromium-text-200.png`.
+Additional screenshots and `results.json` remain in that scratch directory.
+The scratch files are excluded from submission by the assignment.
 
-Result: **14/16 checks pass**. Render, layout, targets, contrast, tracking, eyebrows, sizes, glyphs, slogans, repetition, copy budget, chrome, motion and share pass. The flags are the inherited WHY SWORN/BUILT BY THE SWARM headings and monospace prose, retained because the brief preserves existing copy/style. Both screenshots and the probe's 390px first screen confirm the Explore action is visible. Full-width Mint text follows the brief despite the guide's usual prose measure recommendation.
+## Better Interface: six-domain review
 
-## Delivery and limitations
+The pinned Better Interface workflow, all six core domain sections and its
+documentation method were read and applied during implementation. Original
+notices and licenses remain in `web/LICENSES/Better-Interface.txt`.
 
-The complete export is present with relative asset URLs, verified manifest and existing required artwork. Build configuration, dependencies/lockfile, ignore files, contracts, ABIs and network inputs are unchanged. No generated dependency/cache folder, registry archive or submodule is added. The current-tree Git pack is below 8,340,000 bytes against the 8,388,608-byte cap, measured in a separate temporary repository. One superseded historical preview, `docs/frontend/screenshots/explorer-390.webp`, was removed and its README updated; all runtime assets remain. Two inherited gitlinks under protected `lib/` remain unchanged; no new submodule is introduced.
+| Domain | Coverage, findings and result |
+| --- | --- |
+| Accessibility — Checked | Native main, h1 and anchor, accessible action name, Tab/Enter and visible 2px focus outline; 44px link target. Source: `web/index.html:65`, `web/index.html:81`, `web/index.html:88`. Keyboard and focused screenshot passed. Screen-reader and forced-colors checks were not performed. |
+| Layout — Checked | Single column, logical properties, flexible measure and normal document flow. `web/index.html:47`. No overflow at 320/390/768/1440; required content/action present on first 390px screen. 200% text resizing at 320px reflowed. Native browser zoom and an RTL mirror were not checked. |
+| Writing — Checked | Exact assigned copy at `web/index.html:89`; one clear verb-first native link. No additional marketing copy, directions, dialogs or controls. Static and DOM assertions passed. |
+| Typography — Checked | Original system monospace, two sizes (34px and 15px), weights 600/400, readable line height, balanced heading and wrapping. `web/index.html:31`. Reviewed phone/desktop screenshots and enlarged text. System fallback face varies by device; no downloaded font is involved. |
+| Colors — Checked | Existing dark hex tokens at `web/index.html:27`. Rendered background rgb(10,10,10); text contrast 14.73:1, green link 14.50:1, pale hover 18.23:1. Focus/active use text color. Link remains underlined. Only the existing dark theme is supported. |
+| UI — Checked | One restrained text action with verified rest, hover, active and keyboard-focus states; no enclosures, art, loaders, transitions or animation. `web/index.html:65`. Dialogs, forms, wallet states and animation checks are not applicable. |
 
-Chromium rendering/interactions are checked. The separate browser MCP returned `Transport closed`; local Playwright Chromium and its screenshots supplied the browser evidence instead. WebKit's executable is unavailable, so WebKit interactions are unperformed. No live service accuracy, physical wallet, passkey, real payment/settlement, screen-reader or native zoom claim is made. Scratch evidence is reproducible under `test/scratch/` and intentionally excluded from submission. Publication and the final network commit are outside this workspace edit; no publish command or direct `.git/` change was made.
+Resolved implementation findings:
 
-Complete for the requested implementation and worker-side build/check scope, with the explicit limits above.
+- **High — `web/index.html:88`:** the old entry booted the full application.
+  Replaced it with the exact move notice and synchronous hash-preserving
+  history replacement (`web/index.html:94`). Static execution and real browser
+  navigation/Back checks passed.
+- **High — `web/scripts/manifest.mjs:10`:** inherited Vite public copying and
+  the old manifest writer would leave the retired app's ABI, art, data and
+  deployment metadata in the export. The final build now removes everything
+  outside the exact two-file allowlist, and `--check` verifies without mutation.
+  Final export verification and filesystem inspection passed.
+
+No applicable unresolved visual or interaction finding was observed in the
+checked Chromium states. The first implementation of the browser harness had
+two harness assumptions corrected: history length after traversing existing
+forward entries, and Tab order after a prior mouse-focus test. The page itself
+required no change for those corrections; final assertions test Back behavior
+and start keyboard inspection in a fresh document.
+
+## Pinned design probe
+
+The unmodified probe was run directly on `dist/` with `--offline`. The immediate
+redirect left its measurement page empty after the destination was blocked;
+its render/share failures and other empty-page measurements are not a valid
+visual assessment of this notice.
+
+It was then run from `node web/tests/redirect-browser.mjs --chromium-only --taste`
+against `/inspect/`, with the same production HTML and the response policy
+described above. `IMD_PLAYWRIGHT` selected the installed Playwright module.
+The probe itself was not edited. Output: `test/scratch/taste/taste.json` and
+screenshots under `test/scratch/taste/shots/`.
+
+**15 of 16 checks passed.** Rendering, layout, targets, contrast, casing,
+tracking, eyebrows, type sizes, glyphs, slogans, repetition, copy budget, chrome,
+motion and share metadata passed. The only failure was `type-faces` for the
+existing monospace paragraph. The brief explicitly says “in the colours and
+type the site already uses”, so that measured exception is preserved. One
+family, two weights and two type sizes were measured; there is no font excess.
+
+## Limitations and completion
+
+- WebKit's launch was attempted after downloading its browser. It exited 1
+  because required host libraries, including `libgtk-4.so.1`, were unavailable.
+  WebKit/Safari and physical-device checks are **not performed**, not passes.
+- No screen-reader session, automated accessibility audit, native 200% zoom,
+  forced-colors session, RTL localization or external social-crawler test was
+  performed. The recorded 200% check is text resizing, not native zoom.
+- `og:image` reuses the local SVG favicon to honor the export file budget;
+  social platforms that require a raster image may not show a thumbnail.
+- Destination service availability was not tested; test interception verifies
+  the exact navigation URL and preserves isolation from the destination's app.
+- The inherited dapp suites were not run: their wallet/ABI/UI assertions apply
+  to the retired application. The current redirect has its own targeted suite.
+
+Complete for the stated redirect scope, with the browser and documentation-path
+limitations above. No question, credential or private requester value is needed.
+
+Final export SHA-256:
+
+- `index.html`: `b2e47efb678fad0186305e15a70e8338d4d60d28f3fb36ae8c7ced780b7f2694`
+- `favicon.svg`: `1f745a9a1e2db3fcdb9d06c7b14f230c49dec80ad6bfdf51f33c81e6e8a6abd6`
